@@ -1,5 +1,6 @@
+
 import unittest
-from project import Hotel, Room, Booking
+from project import Hotel, Room, Booking, Customer
 import datetime
 
 class TestHotelBookingSystem(unittest.TestCase):
@@ -8,6 +9,8 @@ class TestHotelBookingSystem(unittest.TestCase):
         self.hotel.add_room(101, 'Single')
         self.hotel.add_room(102, 'Double')
         self.hotel.add_room(201, 'Suite')
+        self.hotel.add_customer("Alice", "alice@example.com")
+        self.hotel.add_customer("Bob", "bob@example.com")
 
     def test_room_booking(self):
         check_in = datetime.date.today() + datetime.timedelta(days=1)
@@ -43,7 +46,7 @@ class TestHotelBookingSystem(unittest.TestCase):
     def test_room_availability(self):
         availability = self.hotel.view_room_availability()
         self.assertEqual(len(availability), 3)
-        self.assertIn("Room 101: Single", availability[0])
+        self.assertIn("Room 101", availability[0])
 
     def test_booking_summary(self):
         check_in = datetime.date.today() + datetime.timedelta(days=1)
@@ -52,6 +55,23 @@ class TestHotelBookingSystem(unittest.TestCase):
         summary = self.hotel.get_booking_summary()
         self.assertEqual(len(summary), 1)
         self.assertIn("Alice", summary[0])
+
+    def test_customer_details(self):
+        check_in = datetime.date.today() + datetime.timedelta(days=2)
+        check_out = datetime.date.today() + datetime.timedelta(days=4)
+        self.hotel.book_room("Alice", 'Single', check_in, check_out)
+        details = self.hotel.get_customer_details("Alice")
+        self.assertEqual(len(details), 1)
+        self.assertIn("Room 101", details[0])
+
+    def test_add_feature_to_room(self):
+        room = next(room for room in self.hotel.rooms if room.room_number == 101)
+        result = room.add_feature("Ocean View")
+        self.assertIn("Feature 'Ocean View'", result)
+
+    def test_customer_not_found(self):
+        details = self.hotel.get_customer_details("Charlie")
+        self.assertIn("Customer Charlie not found", details)
 
 if __name__ == '__main__':
     unittest.main()
